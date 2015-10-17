@@ -1,0 +1,25 @@
+- understand the api (what is the min, max id and see if i can use this to my advantage)
+  - regarding the data, min max id is notning more than id organized by date (see if a date exists and get the min/max id of locally stored data to see whether we need to make more requests)
+- because backend asks for api via json, it is clear the frontend needs some syncing via either ajax or a framework like backbone
+
+**** CURRENT
+- replace faraday with restclient (why? trying to make a get request but it uses %5B which is '[' or ']' instead of '&', looks simpler anyways)
+
+model (data stored is at our discretion, let's store what is valuable to display via web)
+  - type (frontend requires image or video so lets just put in type)
+  - tag
+  - link (image or video)
+  - image
+  - username
+  - tagged_at: tag time (photo created time or time comment was posted, depending on where the tag comes from)
+  - raw_info (all the info just in case)
+
+### Copy and pasted code
+collection.map {|x| {created: Time.at(x.created_time.to_i), tagged: x.comments['data'].map {|y| Time.at(y.created_time.to_i) }, id: x.id} }
+
+
+### stack overflow links
+http://stackoverflow.com/questions/20625173/how-does-instagrams-get-tags-tag-media-recent-pagination-actually-work
+https://github.com/Instagram/instagram-ruby-gem/issues/173
+https://github.com/Instagram/instagram-ruby-gem/issues/140
+https://github.com/Instagram/instagram-ruby-gem/issues/187
