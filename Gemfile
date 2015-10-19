@@ -18,7 +18,6 @@ gem 'rails-backbone'
 
 gem 'omniauth'
 gem 'omniauth-instagram'
-gem 'instagram',  :git => 'git://github.com/Instagram/instagram-ruby-gem.git'
 gem 'faraday' # TODEL: replace oauth part with rest-client instead
 gem 'rest-client'
 
