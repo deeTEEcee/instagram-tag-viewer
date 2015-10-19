@@ -1,79 +1,107 @@
 InstagramTagView.Views.Media ||= {}
 
+# TODO: save form data state so that we can go "back" in the same browser window to the posted state (should i keep this view separate?)
+# For saving state, save it in local storage instead and possibly with a separate model?
+
+API_COLLECTION_SIZE = 33
+
 class InstagramTagView.Views.Media.CollectionView extends Backbone.View
   template: JST["backbone/templates/media/collection"]
 
   events:
-    "submit": "load"
+    "submit": "submit"
 
   initialize: () ->
-    _.bindAll(this, "render")
+    # _.bindAll(this, "addSet", "load") # setupMasonry
+    @detectScroll()
+    opts = { position: 'relative', top: '50px' }
 
+    @paginationIndex = 0
     @collection = new InstagramTagView.Collections.MediaItemsCollection()
-    @collection.bind('reset', @addAll)
-    test = {image_link: "https://scontent.cdninstagram.com/hphotos-xaf1/t51.2885-15/s640x640/sh0.08/e35/12106050_891707344212551_1122382914_n.jpg ", link: "https://www.google.com", tag: "tag", data_type: "image", username: "username", tagged_at: "2015-10-17"}
-    @collection.reset [test, test, test, test, test, test, test, test, test]
-    from_date = new Date()
-    from_date.setMonth(from_date.getMonth()-1)
-    from_date = from_date.toISOString()
-    @from_date = from_date.substr(0, from_date.indexOf('T'))
-    to_date = new Date()
-    to_date = to_date.toISOString()
-    @to_date = to_date.substr(0, to_date.indexOf('T'))
+    @from_date = null
+    @to_date = null
+    @tag = null
+    @initForm()
+    @load()
 
-  load: (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-
-    data = {}
+  initForm: () ->
+    form_params = {}
     $.each $('form#search').serializeArray(), (i, field) ->
-      data[field.name] = field.value
-    @from_date = data['from']
-    @to_date = data['to']
-    @tag = data['tag']
+      form_params[field.name] = field.value
+    @from_date = form_params['from']
+    @to_date = form_params['to']
+    @tag = form_params['tag']
+
+  load: () ->
+    $('img#spin').show()
+    that = this
+    params =
+      page_index: @paginationIndex
+      from_date: @from_date
+      to_date: @to_date
+      tag: @tag
 
     $.ajax
       type: "POST",
       dataType: "json"
       url: "api/media"
-      data: data
+      data: params
       context: this
       success: (data) ->
-        @collection.fetch
-          success: @render
-          error: (collection, response, options) ->
-            console.log('error')
+        if data.code == 0 || data.code == 1
+          @collection.fetch
+            data: params
+            success: () ->
+              console.log('get collection')
+              that.addSet()
+              that.paginationIndex += 1
+              $('img#spin').hide()
+            error: (collection, response, options) ->
+              console.log('error')
+        else if data.code == 2
+          console.log('out of tags to search for')
+        else if data.code == 3
+          console.log('code rate limit exceeded')
 
-  addAll: () =>
-    @collection.each(@addOne)
+  detectScroll: () ->
+    that = @
+    throttled = _.throttle(
+     (() ->
+      if ($(window).scrollTop() + $(window).height() == $(document).height())
+        console.log('scrolling')
+        that.scrolledToBottom = true
+        that.load()
+     ), 500)
+    $(window).scroll(throttled)
 
-  addOne: (mediaItem) =>
+  submit: (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    @load()
+
+  addSet: () ->
+    that = this
+    startIndex = @paginationIndex * API_COLLECTION_SIZE
+    _.each @collection.models, (model) ->
+      that.addOne(model)
+    # _.each @collection.models.slice(startIndex, startIndex + API_COLLECTION_SIZE), (model) ->
+      # that.addOne(model)
+
+  addOne: (mediaItem) ->
     view = new InstagramTagView.Views.MediaItems.MediaItemView({model : mediaItem})
-    @$(".collection").append(view.render().el)
+    @$("#media-collection").append(view.render().el)
 
-  render: =>
+  # setupMasonry: () ->
+  #   @$('#media-collection').masonry({
+  #     itemSelector: '.media-item',
+  #     columnWidth: 20
+  #   })
+
+
+  render: ->
     @$el.html(@template(mediaItems: @collection.toJSON(), from: @from_date, to: @to_date, tag: @tag))
-    @addAll()
+    # setTimeout @setupMasonry, 0
+
+
 
     return this
-
-# InstagramTagView.Views.MediaItems ||= {}
-
-# class InstagramTagView.Views.MediaItems.IndexView extends Backbone.View
-#   template: JST["backbone/templates/media_items/index"]
-
-#   initialize: () ->
-#     @collection.bind('reset', @addAll)
-
-#   addAll: () =>
-#     @collection.each(@addOne)
-
-#   addOne: (mediaItem) =>
-#     view = new InstagramTagView.Views.MediaItems.MediaItemView({model : mediaItem})
-#     @$("tbody").append(view.render().el)
-
-#   render: =>
-#     @$el.html(@template(mediaItems: @collection.toJSON() ))
-#     @addAll()
-
-#     return this

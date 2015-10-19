@@ -18,4 +18,6 @@
 //= require backbone_rails_sync
 //= require backbone_datalink
 //= require backbone/instagram_tagview
+
+//= require masonry
 //= require_tree .

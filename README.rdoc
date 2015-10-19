@@ -3,7 +3,10 @@
 - because backend asks for api via json, it is clear the frontend needs some syncing via either ajax or a framework like backbone
 
 **** CURRENT
-- replace faraday with restclient (why? trying to make a get request but it uses %5B which is '[' or ']' instead of '&', looks simpler anyways)
+- issue:
+  - we're going to do pagination with indexes and increment over time (how to loop properly through the collection)
+  - on the server, if we have a specific pagination and there's no more in the postgres server, how do we get the next set? (possible solution: save the next max pagination to all the models, even though it's repetitive, that way we can see which one's the last one received in the previous pagination)
+
 
 model (data stored is at our discretion, let's store what is valuable to display via web)
   - type (frontend requires image or video so lets just put in type)

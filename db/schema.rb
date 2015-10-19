@@ -30,10 +30,11 @@ ActiveRecord::Schema.define(version: 20151015213639) do
     t.string   "link"
     t.string   "image_link"
     t.string   "username"
+    t.string   "next_max_tag_id"
     t.datetime "tagged_at"
     t.text     "raw_info"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
   end
 
 end

@@ -1,49 +1,72 @@
 class MediaController < ApplicationController
 
+  API_COLLECTION_SIZE = 33
+
   def collection_get
-    # get local collections based on same params from last time
-    render json: MediaItem.all
+    page_index = params[:page_index].to_i
+    # from_date = Date.parse(params[:from_date])
+    tag = params[:tag]
+    # no need to order, id order by default == recent -> older
+    media_items = MediaItem.where(tag: params[:tag])
+              .offset(page_index * API_COLLECTION_SIZE)
+              .limit(API_COLLECTION_SIZE)
+    # TODO: queries and do pagination
+    render json: media_items
   end
 
+  # TODO: if elements based on page_index do not exist, THEN you grab it from the previous page_index's next_max_page_id
   def collection_post
-
-    from_date = Date.parse(params[:from])
-    to_date = Date.parse(params[:to])
+    page_index = params[:page_index].to_i
+    from_date = Date.parse(params[:from_date])
+    tag = params[:tag]
     rate_limit_usable = true
     tagged_within_date = true
-    # while rate_limit_usable && tagged_within_date
-    # 5.times do
-    #   response = tag_recent_media_request(params[:tag], count: 33)
-    #   collection = JSON.parse(response.body)["data"]
-    #   collection.each do |media_attributes|
-    #     tagged_at = nil
-    #     created_time = media_attributes['created_time'].to_i
-    #     tagged_at = Time.at(created_time) if media_attributes['tags'].include?(params[:tag])
-    #     if !tagged_at
-    #       comment_tagged_at_list = []
-    #       media_attributes['comments']['data'].each do |comment|
-    #         comment_tagged_at_list << Time.at(comment['created_time']) if comment['text'].split.include?("#{tag}")
-    #         break
-    #       end
-    #       # with more than one tagged comment, get the latest one
-    #       tagged_at = comment_tagged_at_list.max
-    #     end
-    #     if !tagged_at.to_date.between?(from_date, to_date)
-    #       tagged_within_date = false
-    #       break
-    #     end
 
-    #     media_item = MediaItem.build_with_instagram(media_attributes, tagged_at: tagged_at, tag: params[:tag])
-    #     media_item.save!
-    #   end
-    #   rate_limit_usable = false if response.headers["x_ratelimit_limit"].to_i <= 0
-    # end
-    render json: { message: "testing" }, status: 200
-    # if rate_limit_usable
-    #   render json: { message: "testing" }, status: 200
-    # else
-    #   render json: { message: "testing" }, status: 200
-    # end
+    media_items = MediaItem.where(tag: params[:tag])
+              .offset(page_index * API_COLLECTION_SIZE)
+              .limit(API_COLLECTION_SIZE)
+    if media_items.exists?
+      render json: { message: "items already exist", code: 0}, status: 200
+    else
+      request_next_max_tag_id = MediaItem.where(tag: params[:tag]).last.try(:next_max_tag_id)
+      response = tag_recent_media_request(params[:tag], count: API_COLLECTION_SIZE, max_tag_id: request_next_max_tag_id)
+      pagination = JSON.parse(response.body)["pagination"]
+      next_max_tag_id = pagination["next_max_tag_id"]
+
+      collection = JSON.parse(response.body)["data"]
+      collection.each do |media_attributes|
+        tagged_at = nil
+        created_time = media_attributes['created_time'].to_i
+        tagged_at = Time.at(created_time) if media_attributes['tags'].include?(params[:tag])
+        if !tagged_at
+          comment_tagged_at_list = []
+          media_attributes['comments']['data'].each do |comment|
+            comment_tagged_at_list << Time.at(comment['created_time']) if comment['text'].split.include?("#{tag}")
+            break
+          end
+          # with more than one tagged comment, get the latest one
+          tagged_at = comment_tagged_at_list.max
+        end
+        if !tagged_at.to_date.between?(from_date, Date.today)
+          tagged_within_date = false
+          break
+        end
+
+        media_item = MediaItem.build_with_instagram(media_attributes)
+        media_item.tagged_at = tagged_at
+        media_item.tag = tag
+        media_item.next_max_tag_id = next_max_tag_id
+        media_item.save!
+      end
+      rate_limit_usable = false if response.headers[:x_ratelimit_remaining].to_i <= 0
+      if !rate_limit_usable
+        render json: { message: "past rate limit", code: 3 }, status: 200
+      elsif !tagged_within_date # out of tags
+        render json: { message: "out of tags to search for", code: 2 }, status: 200
+      else
+        render json: { message: "still searchable", code: 1 }, status: 200
+      end
+    end
   end
 
   private
@@ -61,20 +84,4 @@ class MediaController < ApplicationController
     return RestClient.get url, params: query_hash
   end
 
-end
-
-class AuthController < ApplicationController
-  def create
-    conn = Faraday.new(url: 'https://api.instagram.com')
-    response = conn.post 'oauth/access_token', {
-                                      client_id: Rails.application.secrets.instagram['client_id'],
-                                      client_secret: Rails.application.secrets.instagram['client_secret'],
-                                      grant_type: 'authorization_code',
-                                      code: params[:code],
-                                      redirect_uri: auth_callback_url(provider: :instagram)}
-    attributes = JSON.parse(response.body).slice("access_token")
-    client = ApiClient.new(attributes)
-    client.save!
-    redirect_to root_path
-  end
 end

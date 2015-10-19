@@ -9,3 +9,7 @@ window.InstagramTagView =
   Collections: {}
   Routers: {}
   Views: {}
+
+$ ->
+  new InstagramTagView.Routers.MediaItemsRouter();
+  Backbone.history.start();

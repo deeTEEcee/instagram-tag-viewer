@@ -1,8 +1,8 @@
-<form id="search">
+<form id="search" action="/tags">
   <label>Date</label>
   <input type="date" name="from" value="<%= from %>">
   <label></label>
-  <input type="date" name="to" value="<%= to %>">
+  <input type="date" name="to" value="<%= to %>" readonly style="background-color: #C3C3C3;">
   <label>Tag</label>
   <input type="text" name="tag" placeholder="Enter tag name here">
   <input type="submit">
@@ -11,5 +11,5 @@
 <% if (tag) { %>
   <p>Searching for photos/images with <b>"#<%= tag %>"</b></p>
 <% } %>
-<div class="collection">
+<div id="media-collection">
 </div>

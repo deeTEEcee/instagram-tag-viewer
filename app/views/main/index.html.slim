@@ -1,9 +1,6 @@
 - today = Date.today
 
-h3 index page
+h3 Instagram Tag Viewer
 div#media
-
-javascript:
-  view = new InstagramTagView.Views.Media.CollectionView();
-  $("#media").html(view.render().el);
-  console.log('backbone finished');
+div#loading
+  img#spin src="#{image_path 'spin.gif'}" style="position:relative;left:50%;top:50px;height:40px;width:40px;display:none;"
