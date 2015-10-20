@@ -28,8 +28,8 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     form_params = {}
     $.each $('form#search').serializeArray(), (i, field) ->
       form_params[field.name] = field.value
-    @from_date = form_params['from']
-    @to_date = form_params['to']
+    @from_date = moment(form_params['from'])
+    @to_date = moment(form_params['to'])
     @tag = form_params['tag']
 
   load: () ->
@@ -37,8 +37,8 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     that = this
     params =
       page_index: @paginationIndex
-      from_date: @from_date
-      to_date: @to_date
+      from_date: @from_date.format('YYYY-MM-DD')
+      to_date: @to_date.format('YYYY-MM-DD')
       tag: @tag
 
     $.ajax
@@ -84,23 +84,24 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     startIndex = @paginationIndex * API_COLLECTION_SIZE
     _.each @collection.models, (model) ->
       that.addOne(model)
-    # _.each @collection.models.slice(startIndex, startIndex + API_COLLECTION_SIZE), (model) ->
-      # that.addOne(model)
 
   addOne: (mediaItem) ->
-    view = new InstagramTagView.Views.MediaItems.MediaItemView({model : mediaItem})
-    @$("#media-collection").append(view.render().el)
+    view = new InstagramTagView.Views.Media.MediaItemView({model : mediaItem})
+    viewElements = view.render().el
+    @$("#media-collection").append(viewElements).masonry('appended', viewElements)
 
-  # setupMasonry: () ->
-  #   @$('#media-collection').masonry({
-  #     itemSelector: '.media-item',
-  #     columnWidth: 20
-  #   })
+  setupMasonry: () ->
+    @$('#media-collection').masonry({
+      itemSelector: '.media-item',
+      columnWidth: 200,
+      isFitWidth: true
+    })
 
 
   render: ->
     @$el.html(@template(mediaItems: @collection.toJSON(), from: @from_date, to: @to_date, tag: @tag))
-    # setTimeout @setupMasonry, 0
+    # @setupMasonry()
+    setTimeout @setupMasonry, 0
 
 
 

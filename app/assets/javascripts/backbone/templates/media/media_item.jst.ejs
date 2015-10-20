@@ -1,0 +1,11 @@
+<span>
+  <% if (data_type == 'video') { %>
+    <img class="icon" src="<%= App.assets.imageUrl('video.png') %>"></img>
+  <% } %>
+  <%= username %>
+</span>
+<a href='<%= link %>' target="'_blank">
+  <img class="thumbnail" src="<%= image_link %>">
+</a>
+<span><%= tagged_at.format('MMMM Do YYYY') %></span>
+

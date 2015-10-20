@@ -20,4 +20,5 @@
 //= require backbone/instagram_tagview
 
 //= require masonry
+//= require moment
 //= require_tree .
