@@ -5,7 +5,13 @@
   <%= username %>
 </span>
 <a href='<%= link %>' target="'_blank">
-  <img class="thumbnail" src="<%= image_link %>">
+  <% if (data_type == 'video') { %>
+    <video class="thumbnail" onmouseover="this.play()" onmouseout="this.pause()">
+      <source src="<%= video_link %>">
+    </video>
+  <% } else { %>
+    <img class="thumbnail" src="<%= image_link %>">
+  <% } %>
 </a>
 <span><%= tagged_at.format('MMMM Do YYYY') %></span>
 

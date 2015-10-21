@@ -4,17 +4,13 @@ class MediaController < ApplicationController
 
   def collection_get
     page_index = params[:page_index].to_i
-    # from_date = Date.parse(params[:from_date])
     tag = params[:tag]
-    # no need to order, id order by default == recent -> older
     media_items = MediaItem.where(tag: params[:tag])
               .offset(page_index * API_COLLECTION_SIZE)
               .limit(API_COLLECTION_SIZE)
-    # TODO: queries and do pagination
     render json: media_items
   end
 
-  # TODO: if elements based on page_index do not exist, THEN you grab it from the previous page_index's next_max_page_id
   def collection_post
     page_index = params[:page_index].to_i
     from_date = Date.parse(params[:from_date])
@@ -72,16 +68,29 @@ class MediaController < ApplicationController
   private
 
   # default count is 20, max is 33 for /tag/<tag_name>/recent/media (tested with high number counts)
-  def tag_recent_media_request(tag, count: nil, min_tag_id: nil, max_tag_id: nil)
-    url = "https://api.instagram.com/v1/tags/#{tag}/media/recent"
-    query_hash = {
-      access_token: get_access_token,
-      count: count,
-      min_tag_id: (min_tag_id if min_tag_id),
-      max_tag_id: (max_tag_id if max_tag_id)
-    }
-    query_hash.delete_if { |k,v| v.nil? }
-    return RestClient.get url, params: query_hash
+  def tag_recent_media_request(tag, count: nil, min_tag_id: nil, max_tag_id: nil, retry_request: 3)
+    begin
+      url = "https://api.instagram.com/v1/tags/#{tag}/media/recent"
+      query_hash = {
+        access_token: get_access_token,
+        count: count,
+        min_tag_id: (min_tag_id if min_tag_id),
+        max_tag_id: (max_tag_id if max_tag_id)
+      }
+      query_hash.delete_if { |k,v| v.nil? }
+      response = RestClient.get url, params: query_hash
+    rescue RestClient::BadRequest => e
+      sleep 3
+      if retry_request > 0
+        response = tag_recent_media_request(tag, count: count,
+                                                 min_tag_id: min_tag_id,
+                                                 max_tag_id: max_tag_id,
+                                                 retry_request: retry_request - 1)
+      else
+        raise
+      end
+    end
+    return response
   end
 
 end

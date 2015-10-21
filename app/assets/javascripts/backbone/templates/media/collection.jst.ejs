@@ -8,12 +8,14 @@
   <input type="submit">
 </form>
 
-<% if (tag) { %>
-  <p>Searching for images with <b>"#<%= tag %>"</b></p>
-<% } %>
-<div id="media-collection">
-</div>
+<div class="main-content">
+  <% if (tag) { %>
+    <p>Searching for images with <b>"#<%= tag %>"</b></p>
+  <% } %>
+  <div id="media-collection">
+  </div>
 
-<div>
-  <img id="spin" src="<%= App.assets.imageUrl('spin.gif') %>">
+  <div>
+    <img id="spin" src="<%= App.assets.imageUrl('spin.gif') %>">
+  </div>
 </div>

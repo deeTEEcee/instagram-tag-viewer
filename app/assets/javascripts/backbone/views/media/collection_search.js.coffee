@@ -17,5 +17,5 @@ class InstagramTagView.Views.Media.CollectionSearch extends Backbone.View
     window.location.hash = "/tags"
 
   render: =>
-    @$el.html(@template(mediaItems: null, from: @from_date, to: @to_date, tag: @tag))
+    @$el.html(@template(from: @from_date, to: @to_date, tag: @tag))
     return this

@@ -9,10 +9,9 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
   template: JST["backbone/templates/media/collection"]
 
   events:
-    "submit": "submit"
+    "submit": "submitRefresh"
 
   initialize: () ->
-    # _.bindAll(this, "addSet", "load") # setupMasonry
     @detectScroll()
     opts = { position: 'relative', top: '50px' }
 
@@ -21,8 +20,6 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     @from_date = null
     @to_date = null
     @tag = null
-    @initForm()
-    @load()
 
   initForm: () ->
     form_params = {}
@@ -31,6 +28,16 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     @from_date = moment(form_params['from'])
     @to_date = moment(form_params['to'])
     @tag = form_params['tag']
+
+  refresh: () ->
+    @paginationIndex = 0
+    @collection = new InstagramTagView.Collections.MediaItemsCollection()
+    @render()
+
+  submitRefresh: (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    @refresh()
 
   load: () ->
     $('img#spin').show()
@@ -52,7 +59,6 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
           @collection.fetch
             data: params
             success: () ->
-              console.log('get collection')
               that.addSet()
               that.paginationIndex += 1
               $('img#spin').hide()
@@ -68,7 +74,6 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
     throttled = _.throttle(
      (() ->
       if ($(window).scrollTop() + $(window).height() == $(document).height())
-        console.log('scrolling')
         that.scrolledToBottom = true
         that.load()
      ), 500)
@@ -97,12 +102,9 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
       isFitWidth: true
     })
 
-
-  render: ->
-    @$el.html(@template(mediaItems: @collection.toJSON(), from: @from_date, to: @to_date, tag: @tag))
-    # @setupMasonry()
+  render: () ->
+    @initForm()
+    @$el.html(@template(from: @from_date, to: @to_date, tag: @tag))
+    @load()
     setTimeout @setupMasonry, 0
-
-
-
     return this

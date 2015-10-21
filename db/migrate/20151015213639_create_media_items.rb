@@ -5,6 +5,7 @@ class CreateMediaItems < ActiveRecord::Migration
       t.string :tag
       t.string :link
       t.string :image_link
+      t.string :video_link
       t.string :username
       t.string :next_max_tag_id
       t.datetime :tagged_at
