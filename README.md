@@ -2,8 +2,7 @@
 Accepts date and tag input and as you scroll down, dynamically shows up new instagram media.
 
 ### Notes
-
-- Due to Instagram API, tag data is collected from recent to the older rdates.
+- Due to Instagram API, tag data is collected from recent to the older dates.
 
 ### Instructions
 - navigate to https://instagram-tag-viewer.herokuapp.com and input the dates and tag input which is case insensitive
