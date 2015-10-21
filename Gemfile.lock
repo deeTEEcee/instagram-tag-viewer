@@ -101,6 +101,7 @@ GEM
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
     pg (0.18.3)
+    puma (2.14.0)
     rack (1.6.4)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -203,6 +204,7 @@ DEPENDENCIES
   omniauth
   omniauth-instagram
   pg
+  puma
   rails (= 4.2.1)
   rails-backbone
   rails_12factor

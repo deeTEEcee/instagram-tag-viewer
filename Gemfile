@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.2.1'
+
 gem 'slim-rails'
 
 gem 'rails', '4.2.1'
@@ -28,5 +30,6 @@ end
 
 group :production do
   gem 'rails_12factor'
+  gem 'puma'
 end
 
