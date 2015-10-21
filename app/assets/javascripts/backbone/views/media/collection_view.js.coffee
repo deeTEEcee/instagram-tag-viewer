@@ -65,9 +65,14 @@ class InstagramTagView.Views.Media.CollectionView extends Backbone.View
             error: (collection, response, options) ->
               console.log('error')
         else if data.code == 2
+          $(window).unbind('scroll')
+          @$('#loading').html('<div id="notice">There are no tags available.</div>')
           console.log('out of tags to search for')
         else if data.code == 3
-          console.log('code rate limit exceeded')
+          $(window).unbind('scroll')
+          @$('#loading').html('<div id="notice">API Rate Limit Exceeded.</div>')
+          console.log('rate limit exceeded')
+      # TODO: handle error cases for messages (i've handled it on the server side but client side has not)
 
   detectScroll: () ->
     that = @

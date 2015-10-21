@@ -1,28 +1,12 @@
-- understand the api (what is the min, max id and see if i can use this to my advantage)
-  - regarding the data, min max id is notning more than id organized by date (see if a date exists and get the min/max id of locally stored data to see whether we need to make more requests)
-- because backend asks for api via json, it is clear the frontend needs some syncing via either ajax or a framework like backbone
+## Instagram Tag Viewer
+Accepts date and tag input and as you scroll down, dynamically shows up new instagram media.
 
-**** CURRENT
-- issue:
-  - we're going to do pagination with indexes and increment over time (how to loop properly through the collection)
-  - on the server, if we have a specific pagination and there's no more in the postgres server, how do we get the next set? (possible solution: save the next max pagination to all the models, even though it's repetitive, that way we can see which one's the last one received in the previous pagination)
+### Notes
 
+- Due to Instagram API, tag data is collected from recent to the older rdates.
 
-model (data stored is at our discretion, let's store what is valuable to display via web)
-  - type (frontend requires image or video so lets just put in type)
-  - tag
-  - link (image or video)
-  - image
-  - username
-  - tagged_at: tag time (photo created time or time comment was posted, depending on where the tag comes from)
-  - raw_info (all the info just in case)
-
-### Copy and pasted code
-collection.map {|x| {created: Time.at(x.created_time.to_i), tagged: x.comments['data'].map {|y| Time.at(y.created_time.to_i) }, id: x.id} }
-
-
-### stack overflow links
-http://stackoverflow.com/questions/20625173/how-does-instagrams-get-tags-tag-media-recent-pagination-actually-work
-https://github.com/Instagram/instagram-ruby-gem/issues/173
-https://github.com/Instagram/instagram-ruby-gem/issues/140
-https://github.com/Instagram/instagram-ruby-gem/issues/187
+### Instructions
+- navigate to https://instagram-tag-viewer.herokuapp.com and input the dates and tag input which is case insensitive
+- scroll down all the way to the bottom to load media (Note: if no scrollbar shows up, you have quite a large size mintor and need to make the window smaller)
+- all media is clickable and leads you to the instagram link via a new tab
+- **HTML5 Support Only**: video media is identified by the icon on the top left of the box. video media is automatically played if you drag your mouse over the thumbnail

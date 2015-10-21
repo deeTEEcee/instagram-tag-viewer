@@ -1,4 +1,11 @@
 class MediaItem < ActiveRecord::Base
+
+  before_save :downcase_fields
+
+  def downcase_fields
+    self.tag.downcase!
+  end
+
   class << self
     def build_with_instagram(data)
       media = MediaItem.new(data_to_attributes(data))
